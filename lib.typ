@@ -7,7 +7,11 @@
 
 // Chord Formats
 #let format-chord(c) = {
-  add-chord(if type(c) == str { c } else { c.text })
+  if type(c) == content {
+    c = c.text
+  }
+  add-chord(c)
+  c = c.replace("#", sym.sharp).replace("b", sym.flat)
   text(fill: rgb("#b32c2c"), c)
 }
 
@@ -49,7 +53,7 @@
   let make-chord = new-chordgen(string-number: if instrument == "guitar" { 6 } else { 4 })
 
   let frets = get-chord(chord)
-  make-chord(frets, name: chord)
+  make-chord(frets, name: chord.replace("#", sym.sharp).replace("b", sym.flat))
 }
 
 // Chord Macros
