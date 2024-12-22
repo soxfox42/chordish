@@ -91,9 +91,17 @@
 
   used-chords.update((:))
 }
-#let section(section) = {
-  strong(section)
-  linebreak()
+#let section(section, indent: auto, ..args) = {
+  let body = args.pos().at(0, default: none)
+  let output = {
+    strong(section)
+    linebreak()
+    body
+  }
+  if indent == true or (indent == auto and body != none) {
+    output = box(inset: (left: 2em), output)
+  }
+  output
 }
 
 // Main Template
