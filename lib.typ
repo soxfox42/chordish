@@ -84,7 +84,7 @@
     } else {
       used-chords.at(next-song.location())
     }
-    chords.keys().map(chord => box(chord-diagram(chord))).intersperse(h(1em)).join()
+    chords.keys().map(chord => box(chord-diagram(chord))).join(h(1em))
   }
   [#diagrams <diagrams>]
   v(24pt, weak: true)
