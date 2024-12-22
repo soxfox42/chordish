@@ -1,5 +1,5 @@
 #import "@preview/conchord:0.2.0": new-chordgen
-#import "chords.typ": get-chord, define-chord
+#import "chords.typ": get-chord, define-chord, chord-name
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
@@ -10,7 +10,7 @@
   if type(c) == content {
     c = c.text
   }
-  add-chord(c)
+  add-chord(chord-name(c))
   c = c.replace("#", sym.sharp).replace("b", sym.flat)
   text(fill: rgb("#b32c2c"), c)
 }

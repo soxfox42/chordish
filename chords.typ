@@ -17,6 +17,10 @@
   "B": 11,
 )
 
+#let chord-name(text) = {
+  text.match(chord-regex).captures.join()
+}
+
 #let get-chord(name) = {
   if type(name) == content {
     name = name.text
