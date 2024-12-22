@@ -1,4 +1,4 @@
-#import "@preview/chordish:0.1.0": *
+#import "../../lib.typ": song, section
 
 #song(
   title: "Example Song",
