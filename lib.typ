@@ -1,5 +1,5 @@
 #import "@preview/conchord:0.2.0": new-chordgen
-#import "chords.typ": chords
+#import "chords.typ": get-chord, define-chord
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
@@ -11,12 +11,20 @@
   text(fill: rgb("#b32c2c"), c)
 }
 
-#let inline-chord(chord) = {
+#let inline-chord(chord, fallback: false) = context {
+  if fallback and get-chord(chord) == none {
+    return text("[" + chord + "]")
+  }
+
   text(fill: luma(50%))[\[]
   format-chord(chord)
   text(fill: luma(50%))[\]]
 }
-#let over-chord(chord) = {
+#let over-chord(chord, fallback: false) = context {
+  if fallback and get-chord(chord) == none {
+    return text("[" + chord + "]")
+  }
+
   box(place(bottom, dy: -1em, format-chord(chord)))
 }
 
@@ -34,30 +42,18 @@
   }
 }
 
-// Custom Chords
-#let custom-chords = state("custom-chords", (:))
-#let define-chord(name, frets) = custom-chords.update(c => c + ((name): frets))
-
 // Chord Diagrams
 #let instrument-state = state("instrument", "guitar")
 #let chord-diagram(chord) = context {
   let instrument = instrument-state.get()
-  let make-chord = new-chordgen(
-    string-number: if instrument == "guitar" { 6 } else { 4 }
-  )
+  let make-chord = new-chordgen(string-number: if instrument == "guitar" { 6 } else { 4 })
 
-  let frets = custom-chords.final().at(chord, default: none)
-  if frets == none {
-    let inst-chords = chords.at(instrument)
-    frets = inst-chords.at(chord, default: none)
-  }
-  if frets == none {
-    panic("Unknown chord " + chord)
-  }
+  let frets = get-chord(chord)
   make-chord(frets, name: chord)
 }
 
 // Chord Macros
+#let chord(c) = [#c<chord>]
 #let seq(cs) = [#cs<chord-sequence>]
 
 // Formatting Functions
@@ -75,21 +71,18 @@
   v(12pt, weak: true)
 
   // Chord Diagrams
-  context {
+  let diagrams = context {
     let next-song = {
-      query(selector(<song>).after(here()))
-        .at(0, default: none)
+      query(selector(<song>).after(here())).at(0, default: none)
     }
     let chords = if next-song == none {
       used-chords.final()
     } else {
       used-chords.at(next-song.location())
     }
-    chords.keys()
-      .map(chord => box(chord-diagram(chord)))
-      .intersperse(h(1em))
-      .join()
+    chords.keys().map(chord => box(chord-diagram(chord))).intersperse(h(1em)).join()
   }
+  [#diagrams <diagrams>]
   v(24pt, weak: true)
 
   used-chords.update((:))
@@ -115,11 +108,11 @@
   ),
 )
 #let songbook(
-  title: "Untitled Song",
-  artist: none,
   chords: "inline",
   instrument: "guitar",
-  body
+  autochord: true,
+  diagrams: true,
+  body,
 ) = {
   // Style according to chord display mode
   let mode = chord-modes.at(chords)
@@ -128,11 +121,19 @@
 
   instrument-state.update(instrument)
 
+  show "[[": if autochord { "[" } else { "[[" }
+  show "]]": if autochord { "]" } else { "]]" }
   let chord-regex = regex("\\[(.+?)\\]")
-  show chord-regex: it => (mode.chord)(
-    it.text.match(chord-regex).captures.at(0)
-  )
+  show chord-regex: it => if autochord {
+    (mode.chord.with(fallback: true))(it.text.match(chord-regex).captures.at(0))
+  } else {
+    it
+  }
+
+  show <chord>: mode.chord
   show <chord-sequence>: mode.seq
+
+  show <diagrams>: it => if diagrams { it }
 
   body
 }

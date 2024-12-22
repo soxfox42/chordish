@@ -2,7 +2,7 @@
 
 #song(
   title: "Example Song",
-  artist: "Example Artist"
+  artist: "Example Artist",
 )
 
 #section[Verse 1]
