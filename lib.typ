@@ -50,7 +50,10 @@
 #let instrument-state = state("instrument", "guitar")
 #let chord-diagram(chord) = context {
   let instrument = instrument-state.get()
-  let make-chord = new-chordgen(string-number: if instrument == "guitar" { 6 } else { 4 })
+  let make-chord = new-chordgen(
+    string-number: if instrument == "guitar" { 6 } else { 4 },
+    scale-length: 0.8pt,
+  )
 
   let frets = get-chord(chord)
   make-chord(frets, name: chord.replace("#", sym.sharp).replace("b", sym.flat))
