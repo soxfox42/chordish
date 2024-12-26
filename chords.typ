@@ -1,11 +1,13 @@
 #import "chord-definitions.typ": chords as built-in
 
+#let transpose-state = state("transpose", 0)
+
 #let custom-chords = state("custom-chords", (:))
 #let define-chord(name, frets) = {
   custom-chords.update(c => c + ((name): frets))
 }
 
-#let chord-regex = regex("^\\^?([A-G])([#b])?(.*)$")
+#let chord-regex = regex("^(\\^?)([A-G])([#b])?(.*)$")
 
 #let keys = (
   "C": 0,
@@ -17,9 +19,7 @@
   "B": 11,
 )
 
-#let chord-name(text) = {
-  text.match(chord-regex).captures.join()
-}
+#let key-list = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
 
 #let get-chord(name) = {
   if type(name) == content {
@@ -27,7 +27,10 @@
   }
 
   if name in custom-chords.get() {
-    return custom-chords.get().at(name)
+    return (
+      name: name,
+      frets: custom-chords.get().at(name),
+    )
   }
 
   let match = name.match(chord-regex)
@@ -35,7 +38,7 @@
     return none
   }
 
-  let (key, accidental, kind) = match.captures
+  let (prefix, key, accidental, kind) = match.captures
   let semitones = keys.at(key)
   if accidental == "#" {
     semitones += 1
@@ -44,5 +47,15 @@
   }
   semitones = calc.rem-euclid(semitones, 12)
 
-  built-in.at(state("instrument").get()).at(semitones).at(kind)
+  if transpose-state.get() != 0 {
+    semitones += transpose-state.get()
+    semitones = calc.rem-euclid(semitones, 12)
+
+    name = prefix + key-list.at(semitones) + kind
+  }
+
+  return (
+    name: name,
+    frets: built-in.at(state("instrument").get()).at(semitones).at(kind),
+  )
 }

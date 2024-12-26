@@ -1,22 +1,23 @@
 #import "@preview/conchord:0.2.0": new-chordgen
-#import "chords.typ": get-chord, define-chord, chord-name
+#import "chords.typ": get-chord, define-chord, transpose-state
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
-#let add-chord(chord) = used-chords.update(c => c + ((chord): true))
+#let add-chord(chord) = used-chords.update(c => c + ((chord.name): chord.frets))
 
 // Chord Formats
 #let format-chord(c) = {
   if type(c) == content {
     c = c.text
   }
-  add-chord(chord-name(c))
-  c = c.replace("#", sym.sharp).replace("b", sym.flat)
+  add-chord(c)
+  c = c.name.replace("#", sym.sharp).replace("b", sym.flat)
   text(fill: rgb("#b32c2c"), c)
 }
 
 #let inline-chord(chord, fallback: false) = context {
-  if fallback and get-chord(chord) == none {
+  let chord = get-chord(chord)
+  if fallback and chord == none {
     return text("[" + chord + "]")
   }
 
@@ -25,7 +26,8 @@
   text(fill: luma(50%))[\]]
 }
 #let over-chord(chord, fallback: false) = context {
-  if fallback and get-chord(chord) == none {
+  let chord = get-chord(chord)
+  if fallback and chord == none {
     return text("[" + chord + "]")
   }
 
@@ -48,15 +50,14 @@
 
 // Chord Diagrams
 #let instrument-state = state("instrument", "guitar")
-#let chord-diagram(chord) = context {
+#let chord-diagram(name, frets) = context {
   let instrument = instrument-state.get()
   let make-chord = new-chordgen(
     string-number: if instrument == "guitar" { 6 } else { 4 },
     scale-length: 0.8pt,
   )
 
-  let frets = get-chord(chord)
-  make-chord(frets, name: chord.replace("#", sym.sharp).replace("b", sym.flat))
+  make-chord(frets, name: name)
 }
 
 // Chord Macros
@@ -64,7 +65,7 @@
 #let seq(cs) = [#cs<chord-sequence>]
 
 // Formatting Functions
-#let song(title: "Untitled", artist: none) = {
+#let song(title: "Untitled", artist: none, transpose: 0) = {
   [#pagebreak(weak: true) <song>]
 
   // Song Info
@@ -87,12 +88,13 @@
     } else {
       used-chords.at(next-song.location())
     }
-    chords.keys().map(chord => box(chord-diagram(chord))).join(h(1em))
+    chords.pairs().map(((name, frets)) => box(chord-diagram(name, frets))).join(h(1em))
   }
   [#diagrams <diagrams>]
   v(24pt, weak: true)
 
   used-chords.update((:))
+  transpose-state.update(transpose)
 }
 #let section(section, indent: auto, ..args) = {
   let body = args.pos().at(0, default: none)
