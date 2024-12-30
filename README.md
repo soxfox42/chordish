@@ -80,6 +80,20 @@ A chord is defined with a simple notation where an "x" represents a closed strin
 
 Chords using two-digit fret numbers should separate the strings with commas.
 
+## Transposition
+
+To transpose a song up or down, specify the number of semitones to transpose by in the `song` function:
+
+```typ
+#song(
+    title: "Swing Low Sweet Chariot",
+    artist: "Wallace Willis",
+    transpose: 4, // Up 4 semitones
+)
+```
+
+Transposition currently does not work on custom chords, and leaves them as is.
+
 ## Attributions
 
 Chord definitions are converted from https://github.com/tombatossals/chords-db.
