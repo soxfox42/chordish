@@ -1,4 +1,4 @@
-#import "@preview/conchord:0.2.0": new-chordgen
+#import "@preview/conchord:0.3.0": new-chordgen
 #import "chords.typ": get-chord, define-chord, transpose-state
 
 // Chord Tracking
