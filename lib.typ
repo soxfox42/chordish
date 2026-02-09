@@ -1,5 +1,5 @@
-#import "@preview/conchord:0.3.0": new-chordgen
-#import "chords.typ": get-chord, define-chord, transpose-state
+#import "@preview/conchord:0.4.0": new-chordgen
+#import "chords.typ": define-chord, get-chord, transpose-state
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
