@@ -10,6 +10,9 @@
   if type(c) == content {
     c = c.text
   }
+  if type(c) == str {
+    c = get-chord(c)
+  }
   add-chord(c)
   c = c.name.replace("#", sym.sharp).replace("b", sym.flat)
   text(fill: rgb("#b32c2c"), c)
