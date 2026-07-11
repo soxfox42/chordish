@@ -24,7 +24,7 @@ You can also provide options to `songbook`:
 
     // Automatically insert chords where square brackets are found.
     // If you disable this, you need to manually insert chords using #chord.
-    autochords: false,
+    autochord: false,
 )
 ```
 
