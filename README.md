@@ -5,7 +5,7 @@ A simple template for creating chord sheets (or collections of chord sheets) in 
 Start by importing the `songbook` template and using it for your main document:
 
 ```typ
-#import "@preview/chordish:0.2.2": songbook, song, section
+#import "@preview/chordish:0.2.3": songbook, song, section
 #show: songbook
 ```
 
@@ -46,6 +46,7 @@ Comin’ for to [A7]carry me [D]home. \
 It's also possible to create chords manually using the `chord` function, like `#chord[C7]`. This is the only way to create chords if `autochord` is disabled.
 
 Instrumental sections with only a sequence of chords to play should be created with `seq`:
+
 ```typ
 #seq[C G Am F]
 ```

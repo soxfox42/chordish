@@ -36,7 +36,7 @@ for file in FILES:
     with open(f"{file}.json") as f:
         data = json.load(f)
 
-    chords = [{} for _ in range(12)] 
+    chords = [{} for _ in range(12)]
     for key, group in data["chords"].items():
         index = semitones[key[0]]
         if "sharp" in key or "#" in key:
@@ -51,12 +51,16 @@ for file in FILES:
                 continue
             used_suffixes.append(chord["suffix"])
             suffix = SUFFIXES[chord["suffix"]]
-            frets = chord["positions"][0]["frets"]
+            position = chord["positions"][0]
+            frets = position["frets"]
+            for i, fret in enumerate(frets):
+                if fret != -1:
+                    frets[i] += position["baseFret"] - 1
             frets = [str(fret) if fret != -1 else "x" for fret in frets]
             chords[index][suffix] = "".join(frets)
         if len(used_suffixes) != len(SUFFIXES):
             print("Warning, unmatched suffixes")
-    
+
     instruments[file] = chords
 
 
@@ -64,11 +68,11 @@ with open("../chord-definitions.typ", "w") as f:
     f.write("// Structure: chords > instrument > semitones-from-c > suffix\n")
     f.write("#let chords = (\n")
     for instrument, chords in instruments.items():
-        f.write(f'  {instrument}: (\n')
+        f.write(f"  {instrument}: (\n")
         for group in chords:
-            f.write(f'    (\n')
+            f.write(f"    (\n")
             for suffix, frets in group.items():
                 f.write(f'      "{suffix}": "{frets}",\n')
-            f.write(f'    ),\n')
-        f.write(f'  ),\n')
+            f.write(f"    ),\n")
+        f.write(f"  ),\n")
     f.write(")\n")
