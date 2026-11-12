@@ -30,7 +30,7 @@ semitones = {
     "B": 11,
 }
 
-FILES = ["guitar", "ukulele"]
+FILES = ["guitar", "ukulele", "mandolin"]
 
 for file in FILES:
     with open(f"{file}.json") as f:
