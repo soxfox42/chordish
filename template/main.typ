@@ -1,4 +1,4 @@
-#import "../lib.typ": songbook
+#import "@local/chordish:0.3.0": songbook
 #show: songbook
 
 #text(size: 24pt)[*Example Songbook*]
