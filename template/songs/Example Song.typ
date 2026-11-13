@@ -1,4 +1,4 @@
-#import "../../lib.typ": song, section
+#import "@local/chordish:0.3.0": section, song
 
 #song(
   title: "Example Song",
