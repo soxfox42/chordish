@@ -56,8 +56,13 @@ for file in FILES:
             for i, fret in enumerate(frets):
                 if fret != -1:
                     frets[i] += position["baseFret"] - 1
+            has_high_fret = any(fret >= 10 for fret in frets)
             frets = [str(fret) if fret != -1 else "x" for fret in frets]
-            chords[index][suffix] = "".join(frets)
+            if has_high_fret:
+                fret_string = ",".join(frets)
+            else:
+                fret_string = "".join(frets)
+            chords[index][suffix] = fret_string
         if len(used_suffixes) != len(SUFFIXES):
             print("Warning, unmatched suffixes")
 
