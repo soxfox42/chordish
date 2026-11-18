@@ -13,7 +13,7 @@ You can also provide options to `songbook`:
 
 ```typ
 #show: songbook.with(
-    // "guitar" (default) or "ukulele"
+    // "guitar" (default), "ukulele", or "mandolin"
     instrument: "ukulele",
 
     // "inline" (default) or "above"

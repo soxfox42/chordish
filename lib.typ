@@ -53,10 +53,15 @@
 
 // Chord Diagrams
 #let instrument-state = state("instrument", "guitar")
+#let instrument-strings = (
+  guitar: 6,
+  ukulele: 4,
+  mandolin: 4,
+)
 #let chord-diagram(name, frets) = context {
   let instrument = instrument-state.get()
   let make-chord = new-chordgen(
-    string-number: if instrument == "guitar" { 6 } else { 4 },
+    string-number: instrument-strings.at(instrument),
     scale-length: 0.8pt,
   )
 
