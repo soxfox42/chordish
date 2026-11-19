@@ -1,5 +1,6 @@
 #import "@preview/conchord:0.4.0": new-chordgen
-#import "chords.typ": chord-state, define-chord, get-chord
+#import "chords.typ": define-chord, get-chord
+#import "state.typ": chordish-state
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
@@ -19,23 +20,23 @@
   text(fill: rgb("#b32c2c"), format-name(c.name))
 }
 
-#let inline-chord(chord, fallback: false) = context {
-  let chord = get-chord(chord)
-  if fallback and chord == none {
+#let inline-chord(chord, fallback: false) = {
+  let resolved = get-chord(chord)
+  if fallback and resolved == none {
     return text("[" + chord + "]")
   }
 
   text(fill: luma(50%))[\[]
-  format-chord(chord)
+  format-chord(resolved)
   text(fill: luma(50%))[\]]
 }
-#let over-chord(chord, fallback: false) = context {
-  let chord = get-chord(chord)
-  if fallback and chord == none {
+#let over-chord(chord, fallback: false) = {
+  let resolved = get-chord(chord)
+  if fallback and resolved == none {
     return text("[" + chord + "]")
   }
 
-  box(place(bottom, dy: -1em, format-chord(chord)))
+  box(place(bottom, dy: -1em, format-chord(resolved)))
 }
 
 #let inline-seq(chords) = {
@@ -53,14 +54,13 @@
 }
 
 // Chord Diagrams
-#let instrument-state = state("instrument", "guitar")
 #let instrument-strings = (
   guitar: 6,
   ukulele: 4,
   mandolin: 4,
 )
-#let chord-diagram(name, frets) = context {
-  let instrument = instrument-state.get()
+#let chord-diagram(name, frets) = {
+  let instrument = chordish-state.get().instrument
   let make-chord = new-chordgen(
     string-number: instrument-strings.at(instrument),
     scale-length: 0.8pt,
@@ -74,8 +74,34 @@
 #let seq(cs) = [#cs<chord-sequence>]
 
 // Formatting Functions
-#let song(title: "Untitled", artist: none, transpose: 0) = {
+#let song(
+  title: "Untitled",
+  artist: none,
+  transpose: 0,
+  chords: auto,
+  instrument: auto,
+  autochord: auto,
+  diagrams: auto,
+  simplify-slash: auto,
+) = {
+  let song-settings = (
+    chords: chords,
+    instrument: instrument,
+    autochord: autochord,
+    diagrams: diagrams,
+    simplify-slash: simplify-slash,
+  ).filter(v => v != auto)
+
   [#pagebreak(weak: true) <song>]
+
+  chordish-state.update(s => (
+    ..s,
+    transpose: transpose,
+    // Use the defaults from the songbook...
+    ..s.book-settings,
+    // ...but override anything passed in #song
+    ..song-settings,
+  ))
 
   // Song Info
   heading(title)
@@ -103,7 +129,6 @@
   v(24pt, weak: true)
 
   used-chords.update((:))
-  chord-state.update(s => (..s, transpose: transpose))
 }
 #let section(section, indent: auto, ..args) = {
   let body = args.pos().at(0, default: none)
@@ -141,32 +166,52 @@
   simplify-slash: none,
   body,
 ) = {
-  assert(
-    simplify-slash in (none, "diagram", "all"),
-    message: "simplify-slash must be none, \"diagram\", or \"all\"",
+  let book-settings = (
+    chords: chords,
+    instrument: instrument,
+    autochord: autochord,
+    diagrams: diagrams,
+    simplify-slash: simplify-slash,
   )
+  chordish-state.update(s => (..s, ..book-settings, book-settings: book-settings))
 
   // Style according to chord display mode
-  let mode = chord-modes.at(chords)
-  set par(spacing: mode.spacing, leading: mode.leading)
+  let default-mode = chord-modes.at(chords)
+  set par(spacing: default-mode.spacing, leading: default-mode.leading)
   show outline: set par(leading: 0.65em)
-
-  instrument-state.update(instrument)
-  chord-state.update(s => (..s, simplify-slash: simplify-slash))
-
-  show "[[": if autochord { "[" } else { "[[" }
-  show "]]": if autochord { "]" } else { "]]" }
-  let chord-regex = regex("\\[(.+?)\\]")
-  show chord-regex: it => if autochord {
-    (mode.chord.with(fallback: true))(it.text.match(chord-regex).captures.at(0))
-  } else {
-    it
+  show par: it => context {
+    let mode = chord-modes.at(chordish-state.get().chords)
+    if mode != default-mode and par.leading == default-mode.leading and par.spacing == default-mode.spacing {
+      set par(spacing: mode.spacing, leading: mode.leading)
+      block(above: mode.spacing, below: mode.spacing, it.body)
+    } else {
+      it
+    }
   }
 
-  show <chord>: mode.chord
-  show <chord-sequence>: mode.seq
+  show "[[": it => context if chordish-state.get().autochord { "[" } else { it }
+  show "]]": it => context if chordish-state.get().autochord { "]" } else { it }
+  let chord-regex = regex("\\[(.+?)\\]")
+  show chord-regex: it => context {
+    let s = chordish-state.get()
+    if s.autochord {
+      let mode = chord-modes.at(s.chords)
+      (mode.chord.with(fallback: true))(it.text.match(chord-regex).captures.at(0))
+    } else {
+      it
+    }
+  }
 
-  show <diagrams>: it => if diagrams { it }
+  show <chord>: it => context {
+    let mode = chord-modes.at(chordish-state.get().chords)
+    (mode.chord)(it)
+  }
+  show <chord-sequence>: it => context {
+    let mode = chord-modes.at(chordish-state.get().chords)
+    (mode.seq)(it)
+  }
+
+  show <diagrams>: it => context if chordish-state.get().diagrams { it }
 
   body
 }

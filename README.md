@@ -25,8 +25,16 @@ You can also provide options to `songbook`:
     // Automatically insert chords where square brackets are found.
     // If you disable this, you need to manually insert chords using #chord.
     autochord: false,
+
+    // How to handle slash chords that aren't in the chord library:
+    // - none (default): report an error
+    // - "diagram": keep the slash chord's name, but show the base chord's diagram
+    // - "all": replace them completely with the base chord
+    simplify-slash: "diagram",
 )
 ```
+
+Any of these `songbook` options can also be overridden for an individual song by passing them to `song` (for example, `#song(title: "My Song", instrument: "ukulele", diagrams: false)`).
 
 Then, create your song with `song`, and add the lyrics with chords written between square brackets. Make sure to place a `\` at the end of each line to create a line break, and before `#` to escape it. `section` is useful for marking choruses and similar sections of song.
 

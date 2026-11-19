@@ -1,13 +1,8 @@
 #import "chord-definitions.typ": chords as built-in
-
-#let chord-state = state("chords", (
-  transpose: 0,
-  custom: (:),
-  simplify-slash: none,
-))
+#import "state.typ": chordish-state
 
 #let define-chord(name, frets) = {
-  chord-state.update(s => (..s, custom: s.custom + ((name): frets)))
+  chordish-state.update(s => (..s, custom: s.custom + ((name): frets)))
 }
 
 #let chord-regex = regex("^(\\^?)([A-G])([#b])?([^/]*)(?:/([A-G])([#b])?)?$")
@@ -29,7 +24,7 @@
     name = name.text
   }
 
-  let current = chord-state.get()
+  let current = chordish-state.get()
   if name in current.custom {
     return (
       name: name,
@@ -74,7 +69,7 @@
     }
   }
 
-  let chord-dict = built-in.at(state("instrument").get()).at(semitones)
+  let chord-dict = built-in.at(current.instrument).at(semitones)
   if lookup-key not in chord-dict and has-slash {
     let simplify = current.simplify-slash
     if simplify == "diagram" {
