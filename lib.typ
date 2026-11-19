@@ -1,5 +1,5 @@
 #import "@preview/conchord:0.4.0": new-chordgen
-#import "chords.typ": define-chord, get-chord, transpose-state
+#import "chords.typ": chord-state, define-chord, get-chord
 
 // Chord Tracking
 #let used-chords = state("used-chords", (:))
@@ -102,7 +102,7 @@
   v(24pt, weak: true)
 
   used-chords.update((:))
-  transpose-state.update(transpose)
+  chord-state.update(s => (..s, transpose: transpose))
 }
 #let section(section, indent: auto, ..args) = {
   let body = args.pos().at(0, default: none)

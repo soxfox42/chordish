@@ -1,10 +1,12 @@
 #import "chord-definitions.typ": chords as built-in
 
-#let transpose-state = state("transpose", 0)
+#let chord-state = state("chords", (
+  transpose: 0,
+  custom: (:),
+))
 
-#let custom-chords = state("custom-chords", (:))
 #let define-chord(name, frets) = {
-  custom-chords.update(c => c + ((name): frets))
+  chord-state.update(s => (..s, custom: s.custom + ((name): frets)))
 }
 
 #let chord-regex = regex("^(\\^?)([A-G])([#b])?(.*)$")
@@ -26,10 +28,11 @@
     name = name.text
   }
 
-  if name in custom-chords.get() {
+  let current = chord-state.get()
+  if name in current.custom {
     return (
       name: name,
-      frets: custom-chords.get().at(name),
+      frets: current.custom.at(name),
     )
   }
 
@@ -47,8 +50,8 @@
   }
   semitones = calc.rem-euclid(semitones, 12)
 
-  if transpose-state.get() != 0 {
-    semitones += transpose-state.get()
+  if current.transpose != 0 {
+    semitones += current.transpose
     semitones = calc.rem-euclid(semitones, 12)
 
     name = prefix + key-list.at(semitones) + kind
