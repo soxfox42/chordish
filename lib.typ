@@ -6,6 +6,8 @@
 #let add-chord(chord) = used-chords.update(c => c + ((chord.name): chord.frets))
 
 // Chord Formats
+#let format-name(name) = name.replace("#", sym.sharp).replace("b", sym.flat)
+
 #let format-chord(c) = {
   if type(c) == content {
     c = c.text
@@ -14,8 +16,7 @@
     c = get-chord(c)
   }
   add-chord(c)
-  c = c.name.replace("#", sym.sharp).replace("b", sym.flat)
-  text(fill: rgb("#b32c2c"), c)
+  text(fill: rgb("#b32c2c"), format-name(c.name))
 }
 
 #let inline-chord(chord, fallback: false) = context {
@@ -65,7 +66,7 @@
     scale-length: 0.8pt,
   )
 
-  make-chord(frets, name: name)
+  make-chord(frets, name: format-name(name))
 }
 
 // Chord Macros
