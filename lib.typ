@@ -82,8 +82,8 @@
   }
   if "instrument" in settings {
     assert(
-      settings.instrument in ("guitar", "ukulele"),
-      message: "instrument must be \"guitar\" or \"ukulele\"",
+      settings.instrument in ("guitar", "ukulele", "mandolin"),
+      message: "instrument must be \"guitar\", \"ukulele\", or \"mandolin\"",
     )
   }
   if "autochord" in settings {
