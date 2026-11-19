@@ -20,15 +20,17 @@ instruments = {}
 
 # Based on a root of C, like MIDI.
 # The choice is basically arbitrary though.
-semitones = {
-    "C": 0,
-    "D": 2,
-    "E": 4,
-    "F": 5,
-    "G": 7,
-    "A": 9,
-    "B": 11,
-}
+KEY_LIST = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def note_to_semitone(note):
+    index = KEY_LIST.index(note[0])
+    if "sharp" in note or "#" in note:
+        index += 1
+    if "flat" in note or "b" in note:
+        index -= 1
+    return index % 12
+
 
 FILES = ["guitar", "ukulele", "mandolin"]
 
@@ -38,19 +40,23 @@ for file in FILES:
 
     chords = [{} for _ in range(12)]
     for key, group in data["chords"].items():
-        index = semitones[key[0]]
-        if "sharp" in key or "#" in key:
-            index += 1
-        if "flat" in key or "b" in key:
-            index -= 1
-        index %= 12
+        index = note_to_semitone(key)
 
         used_suffixes = []
         for chord in group:
-            if chord["suffix"] not in SUFFIXES:
+            raw_suffix = chord["suffix"]
+            if raw_suffix in SUFFIXES:
+                used_suffixes.append(raw_suffix)
+                suffix = SUFFIXES[raw_suffix]
+            elif "/" in raw_suffix:
+                kind, bass = raw_suffix.split("/", 1)
+                if kind not in SUFFIXES.values():
+                    continue
+                # Force all slash chords to be stored as sharps
+                bass_name = KEY_LIST[note_to_semitone(bass)]
+                suffix = f"{kind}/{bass_name}"
+            else:
                 continue
-            used_suffixes.append(chord["suffix"])
-            suffix = SUFFIXES[chord["suffix"]]
             position = chord["positions"][0]
             frets = position["frets"]
             for i, fret in enumerate(frets):

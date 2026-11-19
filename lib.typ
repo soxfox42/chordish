@@ -137,14 +137,21 @@
   instrument: "guitar",
   autochord: true,
   diagrams: true,
+  simplify-slash: none,
   body,
 ) = {
+  assert(
+    simplify-slash in (none, "diagram", "all"),
+    message: "simplify-slash must be none, \"diagram\", or \"all\"",
+  )
+
   // Style according to chord display mode
   let mode = chord-modes.at(chords)
   set par(spacing: mode.spacing, leading: mode.leading)
   show outline: set par(leading: 0.65em)
 
   instrument-state.update(instrument)
+  chord-state.update(s => (..s, simplify-slash: simplify-slash))
 
   show "[[": if autochord { "[" } else { "[[" }
   show "]]": if autochord { "]" } else { "]]" }
