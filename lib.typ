@@ -73,6 +73,39 @@
 #let chord(c) = [#c<chord>]
 #let seq(cs) = [#cs<chord-sequence>]
 
+#let validate-settings(settings) = {
+  if "chords" in settings {
+    assert(
+      settings.chords in ("inline", "above"),
+      message: "chords must be \"inline\" or \"above\"",
+    )
+  }
+  if "instrument" in settings {
+    assert(
+      settings.instrument in ("guitar", "ukulele"),
+      message: "instrument must be \"guitar\" or \"ukulele\"",
+    )
+  }
+  if "autochord" in settings {
+    assert(
+      type(settings.autochord) == bool,
+      message: "autochord must be a boolean",
+    )
+  }
+  if "diagrams" in settings {
+    assert(
+      type(settings.diagrams) == bool,
+      message: "diagrams must be a boolean",
+    )
+  }
+  if "simplify-slash" in settings {
+    assert(
+      settings.simplify-slash in (none, "diagram", "all"),
+      message: "simplify-slash must be none, \"diagram\", or \"all\"",
+    )
+  }
+}
+
 // Formatting Functions
 #let song(
   title: "Untitled",
@@ -91,6 +124,7 @@
     diagrams: diagrams,
     simplify-slash: simplify-slash,
   ).filter(v => v != auto)
+  validate-settings(song-settings)
 
   [#pagebreak(weak: true) <song>]
 
@@ -173,6 +207,7 @@
     diagrams: diagrams,
     simplify-slash: simplify-slash,
   )
+  validate-settings(book-settings)
   chordish-state.update(s => (..s, ..book-settings, book-settings: book-settings))
 
   // Style according to chord display mode
