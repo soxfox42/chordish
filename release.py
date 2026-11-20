@@ -7,7 +7,14 @@ import sys
 import tomllib
 from pathlib import Path
 
-EXCLUDE = {".envrc", ".gitignore", "flake.lock", "flake.nix", "release.py"}
+EXCLUDE = {
+    ".envrc",
+    ".gitignore",
+    "DEVELOPMENT.md",
+    "flake.lock",
+    "flake.nix",
+    "release.py",
+}
 
 
 def main() -> int:
